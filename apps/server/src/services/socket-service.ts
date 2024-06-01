@@ -1,7 +1,7 @@
 import { Server } from "socket.io";
 import { Redis } from "ioredis";
 
-//constants
+// constants
 const REDIS_CONFIG = {
   host: process.env.REDIS_HOST,
   port: JSON.parse(process.env.REDIS_PORT || "10200"),
