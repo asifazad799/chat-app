@@ -1,6 +1,8 @@
 import { Server } from "socket.io";
 import { Redis } from "ioredis";
 
+import { prismaClient } from "./prisma";
+
 // constants
 const REDIS_CONFIG = {
   host: process.env.REDIS_HOST,
@@ -52,8 +54,13 @@ export class SocketService {
     sub.on("message", async (channel, message) => {
       if (channel === REDIS_MESSAGE_CHANNEL) {
         console.log("New Message", message);
-
         io.emit("message", message);
+
+        await prismaClient.message.create({
+          data: {
+            text: message,
+          },
+        });
       }
     });
   }
