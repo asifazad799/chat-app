@@ -2,6 +2,7 @@ import { Server } from "socket.io";
 import { Redis } from "ioredis";
 
 import { prismaClient } from "./prisma";
+import { produceMessage } from "./kafka";
 
 // constants
 const REDIS_CONFIG = {
@@ -56,11 +57,14 @@ export class SocketService {
         console.log("New Message", message);
         io.emit("message", message);
 
-        await prismaClient.message.create({
-          data: {
-            text: message,
-          },
-        });
+        await produceMessage(message);
+        console.log("Message produced to kafka");
+
+        // await prismaClient.message.create({
+        //   data: {
+        //     text: message,
+        //   },
+        // });
       }
     });
   }
