@@ -5,11 +5,13 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-import { SocketService } from "./services";
+import { SocketService, consumeMessage } from "./services";
 
 const app = express();
 const socket = new SocketService();
 const server = http.createServer(app);
+
+consumeMessage();
 
 const PORT = process.env.PORT ? process.env.PORT : 8000;
 
