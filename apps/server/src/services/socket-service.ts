@@ -44,10 +44,14 @@ export class SocketService {
         "event:message",
         async ({ message, id }: { message: string; id?: string }) => {
           console.log("New message rec", message, "from", id);
+
           await pub.publish(
             REDIS_MESSAGE_CHANNEL,
             JSON.stringify({ message, id })
           );
+
+          await produceMessage(JSON.stringify({ message, id }));
+          console.log("Message produced to kafka");
         }
       );
     });
@@ -57,8 +61,8 @@ export class SocketService {
         console.log("New Message", message);
         io.emit("message", message);
 
-        await produceMessage(message);
-        console.log("Message produced to kafka");
+        // await produceMessage(message);
+        // console.log("Message produced to kafka");
 
         // await prismaClient.message.create({
         //   data: {

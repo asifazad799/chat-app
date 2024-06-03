@@ -79,6 +79,7 @@ export async function consumeMessage() {
       heartbeat,
       commitOffsetsIfNecessary,
       pause,
+      resolveOffset,
     }) => {
       const messages = batch?.messages?.map((message) => {
         console.log(message?.value?.toString(), "Batch messages processing");
@@ -87,7 +88,6 @@ export async function consumeMessage() {
           text: message?.value?.toString() + "",
         };
       });
-
       try {
         await retryOperation(
           async () => {
@@ -99,28 +99,43 @@ export async function consumeMessage() {
           MAX_RETRIES,
           RETRY_DELAY
         );
-
         // Manually commit offsets after successful insert
-        const lastMessage = batch.messages[batch.messages.length - 1];
-        await commitOffsetsIfNecessary({
-          topics: [
-            {
-              topic: batch.topic,
-              partitions: [
-                {
-                  partition: batch.partition,
-                  offset: (parseInt(lastMessage.offset, 10) + 1).toString(),
-                },
-              ],
-            },
-          ],
-        });
+        // const lastMessage = batch.messages[batch.messages.length - 1];
+        // await commitOffsetsIfNecessary({
+        //   topics: [
+        //     {
+        //       topic: batch.topic,
+        //       partitions: [
+        //         {
+        //           partition: batch.partition,
+        //           offset: (parseInt(lastMessage.offset, 10) + 1).toString(),
+        //         },
+        //       ],
+        //     },
+        //   ],
+        // });
+        batch.messages.forEach((message) => resolveOffset(message.offset));
       } catch (error) {
         console.error("Error during bulk insert, all retries failed", error);
       }
-
       await heartbeat();
     },
-    autoCommit: false,
+    // autoCommit: true,
+    // eachMessage: async ({ message, pause }) => {
+    //   if (!message.value) return;
+    //   console.log("New Message Received");
+    //   try {
+    //     await prismaClient.message.create({
+    //       data: {
+    //         text: message?.value?.toString() + "",
+    //       },
+    //     });
+    //   } catch (error) {
+    //     pause();
+    //     setTimeout(() => {
+    //       consumer.resume([{ topic: "MESSAGES" }]);
+    //     }, 1000);
+    //   }
+    // },
   });
 }
