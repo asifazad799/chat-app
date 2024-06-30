@@ -64,13 +64,20 @@ async function retryOperation(
 const MAX_RETRIES = 2;
 const RETRY_DELAY = 1000; // in milliseconds
 
-export async function consumeMessage() {
+const createConsumer = async() =>{
   const consumer = kafka.consumer({
     groupId: "default",
     minBytes: 500000,
   });
   await consumer.connect();
   await consumer.subscribe({ topic: "MESSAGES", fromBeginning: true });
+
+  return consumer;
+}
+
+export async function consumeMessage() {
+  const consumer = await createConsumer();
+
 
   await consumer.run({
     eachBatchAutoResolve: true,

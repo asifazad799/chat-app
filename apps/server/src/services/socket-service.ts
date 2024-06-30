@@ -61,14 +61,11 @@ export class SocketService {
         console.log("New Message", message);
         io.emit("message", message);
 
+        // message producer moved to socket recive event
+        // in order to remove duplicate.
+
         // await produceMessage(message);
         // console.log("Message produced to kafka");
-
-        // await prismaClient.message.create({
-        //   data: {
-        //     text: message,
-        //   },
-        // });
       }
     });
   }
